@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+    <title>Bids</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+</head>
+<body>
+<script>
+$(document).ready(function() {
+    var bgcolor = 'black';
+
+    var jqxhr = $.getJSON('http://localhost:3031/ad?param1=a&param2=b', function() {
+        console.log("success");
+    })
+    .done(function(data) {
+        console.log("second success");
+        bgcolor = data['color'];
+    })
+    .fail(function() {
+        console.log("error");
+        bgcolor = 'red';
+    })
+    .always(function() {
+        console.log("complete");
+        $('body').attr('bgcolor', bgcolor);
+    });
+});
+</script>
+</body>
+</html>

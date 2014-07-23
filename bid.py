@@ -35,7 +35,7 @@ def bidder_server(args):
         time.sleep(0.1 * random.randint(1,5)) # simulate delay, may exceed deadline
         s.sendto('bidder %s bids %.3f' % (id, random.random()), addr)
 
-def auction(bidders):
+def auction(bidders, max_sec):
     # launch bidding
     for i,b in bidders.items():
         print 'engine bid request to %s' % b.port
@@ -43,9 +43,7 @@ def auction(bidders):
     # gather bids up to deadline
     notseen = copy.deepcopy(bidders)
     bids = dict()
-    start = time.time()
-    end = start + 0.5
-    print 'bid start', start
+    end = time.time() + max_sec
     print 'deadline', end
     while notseen and time.time() < end:
         # try non-blocking read from any bidders we haven't heard from...
@@ -63,22 +61,53 @@ def auction(bidders):
                     key=lambda s:float(s.split(' ')[-1]),
                     reverse=True)[0] if bids else None
     print 'the winner is', winner
-    winner_id = winner.split(' ')[1]
+    winner_id = int(winner.split(' ')[1]) if winner else None
     return winner_id
+
+pool = None
+bidders = None
+
+def bidders_get(bidder_cnt):
+
+    global pool, bidders
+
+    if not pool:
+        pool = Pool(bidder_cnt)
+        bidders = {i: BidderClient(i, '127.0.0.1', 5000+i)
+                    for i in range(bidder_cnt)}
+        # launch bidders
+        pool.map_async(bidder_server, [(i, b.port) for i,b in bidders.items()])
+        time.sleep(0.2) # wait for init
+
+    return pool, bidders
+
+
+from cgi import parse_qs, escape
+import json
+def choose_ad(environ, start_response):
+    #parameters = parse_qs(environ.get('QUERY_STRING', ''))
+    #subject = escape(parameters['subject'][0] if 'subject' in parameters else 'World')
+
+    pool, bidders = bidders_get(3)
+
+    winner_id = auction(bidders, 0.2)
+    #print winner_id
+
+    start_response('200 OK',
+        [
+            ('Content-Type', 'text/html'),
+            ('Access-Control-Allow-Origin', '*')
+        ])
+    resp = {'color':['green','blue','purple'][winner_id] if winner_id else None}
+    return [json.dumps(resp)]
 
 if __name__ == '__main__':
 
-    bidder_cnt = 3
-    pool = Pool(bidder_cnt)
-    bidders = {i: BidderClient(i, '127.0.0.1', 5000+i)
-                for i in range(bidder_cnt)}
+    from wsgiref.simple_server import make_server
+    srv = make_server('localhost', 3031, choose_ad)
+    srv.serve_forever()
 
-    # launch bidders
-    pool.map_async(bidder_server, [(i, b.port) for i,b in bidders.items()])
-    time.sleep(0.2) # wait for init
+    #pool.terminate()
 
-    winner_id = auction(bidders)
-    print winner_id
 
-    pool.terminate()
 
