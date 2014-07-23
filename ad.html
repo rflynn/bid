@@ -20,8 +20,10 @@ var colors = [
 $(document).ready(function() {
     var bgcolor = 'white';
 
-    var jqxhr = $.getJSON('http://localhost:3031/ad?param1='+Date.now(), function() {
-        console.log("success");
+    var jqxhr = $.ajax({
+        url: 'http://localhost:3031/ad?param1='+Date.now(),
+        dataType: 'json',
+        timeout: 3000
     })
     .done(function(data) {
         console.log("second success");
