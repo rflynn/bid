@@ -1,10 +1,12 @@
 # ex: set ts=4 et:
-from multiprocessing import Process, Pipe, Pool
+import multiprocessing
 import time
 import random
 import socket
 import copy
 import pdb
+from cgi import parse_qs, escape
+import json
 
 class BidderClient:
     def __init__(self, id, host, port):
@@ -69,8 +71,7 @@ bidders = None
 
 def bidders_init(bidder_cnt):
     global pool, bidders
-
-    pool = Pool(bidder_cnt)
+    pool = multiprocessing.Pool(bidder_cnt)
     bidders = {i: BidderClient(i, '127.0.0.1', 5000+i)
                 for i in range(bidder_cnt)}
     # launch bidders
@@ -80,10 +81,10 @@ def bidders_init(bidder_cnt):
 
 def bidders_get():
     global bidders
+    for i,b in bidders.items():
+        b.recv() # throw away any pending data
     return bidders
 
-from cgi import parse_qs, escape
-import json
 def choose_ad(environ, start_response):
 
     start_response('200 OK',
