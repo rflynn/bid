@@ -68,7 +68,6 @@ pool = None
 bidders = None
 
 def bidders_init(bidder_cnt):
-
     global pool, bidders
 
     pool = Pool(bidder_cnt)
@@ -77,7 +76,6 @@ def bidders_init(bidder_cnt):
     # launch bidders
     pool.map_async(bidder_server, [(i, b.port) for i,b in bidders.items()])
     time.sleep(0.2) # wait for init
-
     return pool, bidders
 
 def bidders_get():
@@ -87,8 +85,6 @@ def bidders_get():
 from cgi import parse_qs, escape
 import json
 def choose_ad(environ, start_response):
-    #parameters = parse_qs(environ.get('QUERY_STRING', ''))
-    #subject = escape(parameters['subject'][0] if 'subject' in parameters else 'World')
 
     start_response('200 OK',
         [
@@ -102,13 +98,6 @@ def choose_ad(environ, start_response):
     return [json.dumps(resp)]
 
 if __name__ == '__main__':
-
-    '''
-    from wsgiref.simple_server import make_server
-    srv = make_server('localhost', 3031, choose_ad)
-    bidders_init(6)
-    srv.serve_forever()
-    '''
 
     from wsgiref.simple_server import make_server, WSGIServer
     from SocketServer import ThreadingMixIn
