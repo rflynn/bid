@@ -103,12 +103,13 @@ def choose_ad(environ, start_response):
 
 if __name__ == '__main__':
 
+    '''
     from wsgiref.simple_server import make_server
     srv = make_server('localhost', 3031, choose_ad)
     bidders_init(6)
     srv.serve_forever()
-
     '''
+
     from wsgiref.simple_server import make_server, WSGIServer
     from SocketServer import ThreadingMixIn
     class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
@@ -117,7 +118,4 @@ if __name__ == '__main__':
     httpd = make_server('127.0.0.1', 3031, choose_ad, ThreadingWSGIServer)
     print 'Listening on port 3031....'
     httpd.serve_forever()
-    '''
-
-
 
