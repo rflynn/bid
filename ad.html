@@ -6,22 +6,38 @@
 </head>
 <body>
 <script>
-$(document).ready(function() {
-    var bgcolor = 'black';
 
-    var jqxhr = $.getJSON('http://localhost:3031/ad?param1=a&param2=b', function() {
+var colors = [
+    //'red',
+    'orange',
+    'yellow',
+    'green',
+    'blue',
+    'indigo',
+    'violet',
+];
+
+$(document).ready(function() {
+    var bgcolor = 'white';
+
+    var jqxhr = $.getJSON('http://localhost:3031/ad?param1='+Date.now(), function() {
         console.log("success");
     })
     .done(function(data) {
         console.log("second success");
-        bgcolor = data['color'];
+        if (data['id']) {
+            bgcolor = colors[data['id'] % colors.length];
+        } else {
+            bgcolor = 'black';
+        }
+        console.log('bgcolor', bgcolor);
     })
     .fail(function() {
         console.log("error");
         bgcolor = 'red';
     })
     .always(function() {
-        console.log("complete");
+        //console.log("complete");
         $('body').attr('bgcolor', bgcolor);
     });
 });
