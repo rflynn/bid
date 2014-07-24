@@ -86,13 +86,11 @@ def bidders_get():
     return bidders
 
 def choose_ad(environ, start_response):
-
     start_response('200 OK',
         [
             ('Content-Type', 'application/json'),
             ('Access-Control-Allow-Origin', '*')
         ])
-
     bidders = bidders_get()
     winner_id = auction(bidders, 0.1)
     resp = {'id':winner_id}
@@ -102,8 +100,10 @@ if __name__ == '__main__':
 
     from wsgiref.simple_server import make_server, WSGIServer
     from SocketServer import ThreadingMixIn
+
     class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
         pass
+
     bidders_init(6)
     httpd = make_server('127.0.0.1', 3031, choose_ad, ThreadingWSGIServer)
     print 'Listening on port 3031....'
