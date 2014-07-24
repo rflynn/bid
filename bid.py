@@ -4,9 +4,8 @@ import time
 import random
 import socket
 import copy
-import pdb
-from cgi import parse_qs, escape
 import json
+import errno
 
 class BidderClient:
     def __init__(self, id, host, port):
@@ -18,13 +17,14 @@ class BidderClient:
     def send(self, data):
         self.socket.sendto(data, (self.host, self.port))
     def recv(self):
+        data = None
         try:
             data, addr = self.socket.recvfrom(1024)
             return data
         except socket.error as e:
-            if e.errno != 35: # EWOULDBLOCK
-                print e # unexpected error
-        return None
+            if e.errno != errno.EWOULDBLOCK:
+                print e
+        return data
 
 def bidder_server(args):
     id, port = args
@@ -35,7 +35,9 @@ def bidder_server(args):
         data, addr = s.recvfrom(1024)
         print 'bidder %s received: %s' % (id, data)
         time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
-        s.sendto('bidder %s bids %.3f' % (id, random.random()), addr)
+        # TODO: use binary format via struct.pack
+        msg = 'bidder %s bids %.3f' % (id, random.random())
+        s.sendto(msg, addr)
 
 def auction(bidders, max_sec):
     # launch bidding
