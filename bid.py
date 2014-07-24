@@ -89,7 +89,7 @@ def choose_ad(environ, start_response):
 
     start_response('200 OK',
         [
-            ('Content-Type', 'text/html'),
+            ('Content-Type', 'application/json'),
             ('Access-Control-Allow-Origin', '*')
         ])
 
