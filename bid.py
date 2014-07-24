@@ -82,7 +82,7 @@ def bidders_init(bidder_cnt):
 def bidders_get():
     global bidders
     for i,b in bidders.items():
-        b.recv() # throw away any pending data
+        b.recv() # non-blocking read to throw away pending data
     return bidders
 
 def choose_ad(environ, start_response):
