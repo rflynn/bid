@@ -43,7 +43,7 @@ def auction(bidders, max_sec):
         print 'engine bid request to %s' % b.port
         b.send('bid!')
     # gather bids up to deadline
-    notseen = copy.deepcopy(bidders)
+    notseen = copy.copy(bidders)
     bids = dict()
     end = time.time() + max_sec
     print 'deadline', end
