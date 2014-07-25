@@ -73,12 +73,13 @@ function bid(span)
         if (data['id']) {
             var bgcolor = colors[data['id'] % colors.length];
             var price = data['price'];
-            var link = data['vendor'];
+            var vendor = data['id'];
+            var link = 'http://www.' + data['id'] + '/';
             console.log(span, price, data, link);
 
             $('span#'+span+' span.price').text('$'+Math.round(price));
-            $('span#'+span+' span.site a').attr('href', 'http://www.' + link + '/');
-            $('span#'+span+' span.site a').text(link);
+            $('span#'+span+' span.site a').attr('href', link);
+            $('span#'+span+' span.site a').text(vendor);
             //$('span#'+span+' span.site').attr('background-color', bgcolor);
         }
     })
@@ -97,7 +98,11 @@ $(document).ready(function() {
     for (var i = 0; i < 6; i++) {
         var span = 'a'+i;
         $('span#'+span).hide()
-        setTimeout(function(span){ return function(){ bid(span) } }(span), 500*i);
+        setTimeout(function(span) {
+            return function() {
+                bid(span)
+            }
+        }(span), 500*i);
     }
 });
 </script>

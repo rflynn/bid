@@ -43,25 +43,26 @@ def bidder_server(args):
     id, port, vendor = args
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('0.0.0.0', port))
-    print 'bidder %s waiting on port %s' % (vendor, port)
+    print 'port %s bidder %s' % (port, vendor)
     while True:
         data, addr = s.recvfrom(1024)
         print 'bidder %s received: %s' % (vendor, data)
-        #time.sleep(0.01 * random.randint(1,8)) # simulate delay, may exceed deadline
+        time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
         # TODO: use binary format via struct.pack
         msg = 'bidder %s bids %.3f' % (vendor, round(random.random() / 10, 3))
         s.sendto(msg, addr)
 
 def auction(bidders, max_sec):
     # launch bidding
+    print 'auction start'
+    end = time.time() + max_sec
+    print 'deadline', end
     for i,b in bidders.items():
         print 'engine bid request to %s' % b.port
         b.send('bid!')
     # gather bids up to deadline
     notseen = copy.copy(bidders)
     bids = dict()
-    end = time.time() + max_sec
-    print 'deadline', end
     while notseen and time.time() < end:
         # try non-blocking read from any bidders we haven't heard from...
         for i,b in notseen.items():
