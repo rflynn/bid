@@ -7,6 +7,7 @@ import copy
 import json
 import errno
 import struct
+from cgi import parse_qs, escape
 
 def pack(bid_id, bidder_id, bid):
     # struct.unpack('<QQL', struct.pack('<QQL', 0, random.randint(0,0xffffffffL), 5))
@@ -100,6 +101,9 @@ def bidders_get():
     return bidders
 
 def choose_ad(environ, start_response):
+    parameters = parse_qs(environ.get('QUERY_STRING', ''))
+    print 'parameters:', parameters
+    price = int(parameters.get('price','')[0])
     start_response('200 OK',
         [
             ('Content-Type', 'application/json'),
@@ -107,7 +111,10 @@ def choose_ad(environ, start_response):
         ])
     bidders = bidders_get()
     winner_id, winner_price = auction(bidders, 0.1)
-    resp = {'id':winner_id, 'price':winner_price}
+    resp = {
+        'id': winner_id,
+        'price': price * (1+(random.random()/10)) #winner_price
+    }
     return [json.dumps(resp)]
 
 if __name__ == '__main__':

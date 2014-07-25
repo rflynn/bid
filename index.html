@@ -72,8 +72,10 @@ var links = [
 
 function bid(span)
 {
+    $('span#'+span).hide()
+    var price = $('span#'+span+' span.price').text().substr(1);
     var jqxhr = $.ajax({
-        url: 'http://localhost:3031/ad?param1='+Date.now(),
+        url: 'http://localhost:3031/ad?t='+Date.now()+'&price='+price,
         dataType: 'json',
         timeout: 3000
     })
@@ -88,9 +90,6 @@ function bid(span)
             $('span#'+span+' span.site a').attr('href', 'http://www.' + link + '/');
             $('span#'+span+' span.site a').text(link);
             //$('span#'+span+' span.site').attr('background-color', bgcolor);
-
-            $('span#'+span).hide()
-            $('span#'+span).show('slow');
         }
     })
     .fail(function() {
@@ -100,6 +99,7 @@ function bid(span)
     .always(function() {
         //console.log("complete");
         //$('body').attr('bgcolor', bgcolor);
+        $('span#'+span).show('slow');
     });
 }
 
