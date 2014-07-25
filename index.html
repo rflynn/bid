@@ -95,7 +95,9 @@ function bid(span)
 
 $(document).ready(function() {
     for (var i = 0; i < 6; i++) {
-        bid('a'+i);
+        var span = 'a'+i;
+        $('span#'+span).hide()
+        setTimeout(function(span){ return function(){ bid(span) } }(span), 500*i);
     }
 });
 </script>
