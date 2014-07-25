@@ -47,7 +47,7 @@ def bidder_server(args):
         print 'bidder %s received: %s' % (id, data)
         time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
         # TODO: use binary format via struct.pack
-        msg = 'bidder %s bids %.3f' % (id, random.random())
+        msg = 'bidder %s bids %.3f' % (id, random.random() * 1000)
         s.sendto(msg, addr)
 
 def auction(bidders, max_sec):
@@ -77,7 +77,8 @@ def auction(bidders, max_sec):
                     reverse=True)[0] if bids else None
     print 'the winner is', winner
     winner_id = int(winner.split(' ')[1]) if winner else None
-    return winner_id
+    winner_price = float(winner.split(' ')[-1]) if winner else None
+    return winner_id, winner_price
 
 pool = None
 bidders = None
@@ -105,8 +106,8 @@ def choose_ad(environ, start_response):
             ('Access-Control-Allow-Origin', '*')
         ])
     bidders = bidders_get()
-    winner_id = auction(bidders, 0.1)
-    resp = {'id':winner_id}
+    winner_id, winner_price = auction(bidders, 0.1)
+    resp = {'id':winner_id, 'price':winner_price}
     return [json.dumps(resp)]
 
 if __name__ == '__main__':

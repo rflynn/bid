@@ -1,15 +1,114 @@
 <!doctype html>
 <html>
 <head>
+    <script src="jquery.min.js"></script>
     <title>Ads</title>
+    <style>
+    body, div, span, a {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    .circle {
+        border-radius: 50%;
+        background-color: black;
+        color: white;
+        padding-left:4px;
+        padding-right:4px;
+        font-weight: 100;
+    }
+    </style>
 </head>
-<body>
+<body style="background-color:#fff">
 <!--
 http://wpcontent.answcdn.com/wikipedia/commons/thumb/4/43/Standard_web_banner_ad_sizes.svg/580px-Standard_web_banner_ad_sizes.svg.png
 -->
+<div style="padding:0.5em; background-color:inherit; width:700px">
+<div>
+    <img src="5days-jane-herman-bishop-shop-the-look-2_140524899120.jpg_article_gallery_slideshow_v2.jpg">
+</div>
+<div style="font-family:sans-serif">
+<span class="circle">1</span> Christopher Kane striped-detail cotton sweatshirt,
+<span id="a0"><span class="price">$444</span>; <span class="site"><a href="http://www.brownsfashion.com/">brownsfashion.com</a></span></span>
+<span class="circle">2</span> Rag &amp; Bone Boyfriend jean,
+<span id="a1"><span class="price">$220</span>; <span class="site"><a href="http://www.lagarconne.com/">lagarconne.com</a></span></span>
+<span class="circle">3</span> MAC Cosmetics Eye Kohl in Powersurgem
+<span id="a2"><span class="price">$16</span>; <span class="site"><a href="http://www.maccosmetics.com/">maccosmetics.com</a></span></span>
+<span class="circle">4</span> Clare Vivier Foldover clutch,
+<span id="a3"><span class="price">$185</span>; <span class="site"><a href="http://www.stevenalan.com/">stevenalan.com</a></span></span>
+<span class="circle">5</span> Vans Authentic Lo Pro Sneaker;
+<span id="a4"><span class="price">$45</span>; <span class="site"><a href="http://www.nordstrom.com/">nordstrom.com</a></span></span>
+<span class="circle">6</span> Balenciaga golden thick tube ring set,
+<span id="a5"><span class="price">$765</span>; <span class="site"><a href="http://www.barneys.com/">barneys.com</a></span></span>
+</div>
+</div>
+
+<!--
+<hr>
 <iframe width="300" height="100" src="ad.html?a"></iframe>
 <iframe width="468" height="60"  src="ad.html?b"></iframe>
 <iframe width="250" height="250" src="ad.html?c"></iframe>
 <iframe width="234" height="60"  src="ad.html?d"></iframe>
+-->
+
+<script>
+
+var colors = [
+    //'red',
+    'orange'
+    ,'yellow'
+    ,'green'
+    ,'blue'
+    ,'indigo'
+    ,'violet'
+];
+
+var links = [
+    'brownsfashion.com'
+    ,'lagarconne.com'
+    ,'maccosmetics.com'
+    ,'stevenalan.com'
+    ,'nordstrom.com'
+    ,'barneys.com'
+];
+
+function bid(span)
+{
+    var jqxhr = $.ajax({
+        url: 'http://localhost:3031/ad?param1='+Date.now(),
+        dataType: 'json',
+        timeout: 3000
+    })
+    .done(function(data) {
+        if (data['id']) {
+            var bgcolor = colors[data['id'] % colors.length];
+            var price = data['price'];
+            var link = links[data['id'] % links.length];
+            console.log(data, link);
+
+            $('span#'+span+' span.price').text('$'+Math.round(price));
+            $('span#'+span+' span.site a').attr('href', 'http://www.' + link + '/');
+            $('span#'+span+' span.site a').text(link);
+            //$('span#'+span+' span.site').attr('background-color', bgcolor);
+
+            $('span#'+span).hide()
+            $('span#'+span).show('slow');
+        }
+    })
+    .fail(function() {
+        console.log("error");
+        bgcolor = 'red';
+    })
+    .always(function() {
+        //console.log("complete");
+        //$('body').attr('bgcolor', bgcolor);
+    });
+}
+
+$(document).ready(function() {
+    for (var i = 0; i < 6; i++) {
+        bid('a'+i);
+    }
+});
+</script>
+
 </body>
 </html>
