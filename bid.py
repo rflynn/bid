@@ -6,6 +6,17 @@ import socket
 import copy
 import json
 import errno
+import struct
+
+def pack(bid_id, bidder_id, bid):
+    # struct.unpack('<QQL', struct.pack('<QQL', 0, random.randint(0,0xffffffffL), 5))
+    return struct.pack('<QQL', bid_id, bidder_id, bid)
+
+def unpack(data):
+    try:
+        return struct.unpack('<QQL', data)
+    except:
+        return (None, None, None)
 
 class BidderClient:
     def __init__(self, id, host, port):
