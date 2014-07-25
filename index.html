@@ -61,21 +61,11 @@ var colors = [
     ,'violet'
 ];
 
-var links = [
-    'brownsfashion.com'
-    ,'lagarconne.com'
-    ,'maccosmetics.com'
-    ,'stevenalan.com'
-    ,'nordstrom.com'
-    ,'barneys.com'
-];
-
 function bid(span)
 {
-    $('span#'+span).hide()
     var price = $('span#'+span+' span.price').text().substr(1);
     var jqxhr = $.ajax({
-        url: 'http://localhost:3031/ad?t='+Date.now()+'&price='+price,
+        url: 'http://localhost:3031/ad?price='+price+'&t='+Date.now(),
         dataType: 'json',
         timeout: 3000
     })
@@ -83,8 +73,8 @@ function bid(span)
         if (data['id']) {
             var bgcolor = colors[data['id'] % colors.length];
             var price = data['price'];
-            var link = links[data['id'] % links.length];
-            console.log(data, link);
+            var link = data['vendor'];
+            console.log(span, price, data, link);
 
             $('span#'+span+' span.price').text('$'+Math.round(price));
             $('span#'+span+' span.site a').attr('href', 'http://www.' + link + '/');

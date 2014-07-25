@@ -20,8 +20,9 @@ def unpack(data):
         return (None, None, None)
 
 class BidderClient:
-    def __init__(self, id, host, port):
+    def __init__(self, id, vendor, host, port):
         self.id = id
+        self.vendor = vendor
         self.host = host
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -39,16 +40,16 @@ class BidderClient:
         return data
 
 def bidder_server(args):
-    id, port = args
+    id, port, vendor = args
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('0.0.0.0', port))
-    print 'bidder %s waiting on port %s' % (id, port)
+    print 'bidder %s waiting on port %s' % (vendor, port)
     while True:
         data, addr = s.recvfrom(1024)
-        print 'bidder %s received: %s' % (id, data)
-        time.sleep(0.01 * random.randint(1,8)) # simulate delay, may exceed deadline
+        print 'bidder %s received: %s' % (vendor, data)
+        #time.sleep(0.01 * random.randint(1,8)) # simulate delay, may exceed deadline
         # TODO: use binary format via struct.pack
-        msg = 'bidder %s bids %.3f' % (id, random.random() * 1000)
+        msg = 'bidder %s bids %.3f' % (vendor, round(random.random() / 10, 3))
         s.sendto(msg, addr)
 
 def auction(bidders, max_sec):
@@ -77,20 +78,22 @@ def auction(bidders, max_sec):
                     key=lambda s:float(s.split(' ')[-1]),
                     reverse=True)[0] if bids else None
     print 'the winner is', winner
-    winner_id = int(winner.split(' ')[1]) if winner else None
+    winner_id = winner.split(' ')[1] if winner else None
     winner_price = float(winner.split(' ')[-1]) if winner else None
     return winner_id, winner_price
 
 pool = None
 bidders = None
 
-def bidders_init(bidder_cnt):
+def bidders_init(vendors):
     global pool, bidders
-    pool = multiprocessing.Pool(bidder_cnt)
-    bidders = {i: BidderClient(i, '127.0.0.1', 5000+i)
-                for i in range(bidder_cnt)}
+    pool = multiprocessing.Pool(len(vendors))
+    bidders = {i: BidderClient(i, v, '127.0.0.1', 5000+i)
+                for i,v in enumerate(vendors)}
     # launch bidders
-    pool.map_async(bidder_server, [(i, b.port) for i,b in bidders.items()])
+    pool.map_async(bidder_server,
+        [(i, b.port, b.vendor)
+            for i,b in bidders.items()])
     time.sleep(0.2) # wait for init
     return pool, bidders
 
@@ -113,9 +116,18 @@ def choose_ad(environ, start_response):
     winner_id, winner_price = auction(bidders, 0.1)
     resp = {
         'id': winner_id,
-        'price': price * (1+(random.random()/10)) #winner_price
+        'price': price * (1+(random.random()/10))
     }
     return [json.dumps(resp)]
+
+vendors = [
+    'brownsfashion.com'
+    ,'lagarconne.com'
+    ,'maccosmetics.com'
+    ,'stevenalan.com'
+    ,'nordstrom.com'
+    ,'barneys.com'
+]
 
 if __name__ == '__main__':
 
@@ -125,7 +137,7 @@ if __name__ == '__main__':
     class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
         pass
 
-    bidders_init(6)
+    bidders_init(vendors)
     httpd = make_server('127.0.0.1', 3031, choose_ad, ThreadingWSGIServer)
     print 'Listening on port 3031....'
     httpd.serve_forever()
