@@ -45,7 +45,7 @@ def bidder_server(args):
     while True:
         data, addr = s.recvfrom(1024)
         print 'bidder %s received: %s' % (id, data)
-        time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
+        time.sleep(0.01 * random.randint(1,8)) # simulate delay, may exceed deadline
         # TODO: use binary format via struct.pack
         msg = 'bidder %s bids %.3f' % (id, random.random() * 1000)
         s.sendto(msg, addr)
