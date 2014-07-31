@@ -27,17 +27,17 @@ http://wpcontent.answcdn.com/wikipedia/commons/thumb/4/43/Standard_web_banner_ad
 </div>
 <div style="font-family:sans-serif; text-align:left">
 <span class="circle">1</span> Christopher Kane striped-detail cotton sweatshirt,
-<span id="a0"><span class="price">$444</span>; <span class="site"><a href="http://www.brownsfashion.com/">brownsfashion.com</a></span></span>
+<span id="a0" class="bamx"><span class="price">$444</span>; <span class="site"><a href="http://www.brownsfashion.com/">brownsfashion.com</a></span></span>
 <span class="circle">2</span> Rag &amp; Bone Boyfriend jean,
-<span id="a1"><span class="price">$220</span>; <span class="site"><a href="http://www.lagarconne.com/">lagarconne.com</a></span></span>
+<span id="a1" class="bamx"><span class="price">$220</span>; <span class="site"><a href="http://www.lagarconne.com/">lagarconne.com</a></span></span>
 <span class="circle">3</span> MAC Cosmetics Eye Kohl in Powersurgem
-<span id="a2"><span class="price">$16</span>; <span class="site"><a href="http://www.maccosmetics.com/">maccosmetics.com</a></span></span>
+<span id="a2" class="bamx"><span class="price">$16</span>; <span class="site"><a href="http://www.maccosmetics.com/">maccosmetics.com</a></span></span>
 <span class="circle">4</span> Clare Vivier Foldover clutch,
-<span id="a3"><span class="price">$185</span>; <span class="site"><a href="http://www.stevenalan.com/">stevenalan.com</a></span></span>
+<span id="a3" class="bamx"><span class="price">$185</span>; <span class="site"><a href="http://www.stevenalan.com/">stevenalan.com</a></span></span>
 <span class="circle">5</span> Vans Authentic Lo Pro Sneaker;
-<span id="a4"><span class="price">$45</span>; <span class="site"><a href="http://www.nordstrom.com/">nordstrom.com</a></span></span>
+<span id="a4" class="bamx"><span class="price">$45</span>; <span class="site"><a href="http://www.nordstrom.com/">nordstrom.com</a></span></span>
 <span class="circle">6</span> Balenciaga golden thick tube ring set,
-<span id="a5"><span class="price">$765</span>; <span class="site"><a href="http://www.barneys.com/">barneys.com</a></span></span>
+<span id="a5" class="bamx"><span class="price">$765</span>; <span class="site"><a href="http://www.barneys.com/">barneys.com</a></span></span>
 </div>
 </div>
 
@@ -87,9 +87,11 @@ function bid(span)
 }
 
 $(document).ready(function() {
-    for (var i = 0; i < 6; i++) {
-        var span = 'a'+i;
-        $('span#'+span).hide()
+    var bamx = document.getElementsByClassName('bamx');
+    for (var i = 0; i < bamx.length; i++) {
+        var span = bamx[i].attributes["id"].value;
+        console.log(span);
+        $('span#'+span).hide() // TODO: remove dependence on jQuery
         setTimeout(function(span) {
             return function() {
                 bid(span)
