@@ -44,13 +44,16 @@ def bidder_server(args):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('0.0.0.0', port))
     print 'port %s bidder %s' % (port, vendor)
-    while True:
-        data, addr = s.recvfrom(1024)
-        print 'bidder %s received: %s' % (vendor, data)
-        time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
-        # TODO: use binary format via struct.pack
-        msg = 'bidder %s bids %.3f' % (vendor, round(random.random() / 10, 3))
-        s.sendto(msg, addr)
+    try:
+        while True:
+            data, addr = s.recvfrom(1024)
+            print 'bidder %s received: %s' % (vendor, data)
+            time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
+            # TODO: use binary format via struct.pack
+            msg = 'bidder %s bids %.3f' % (vendor, round(random.random() / 10, 3))
+            s.sendto(msg, addr)
+    except KeyboardInterrupt:
+        print('shutting down bidder %s' % vendor)
 
 def auction(bidders, max_sec):
     # launch bidding
@@ -141,5 +144,8 @@ if __name__ == '__main__':
     bidders_init(vendors)
     httpd = make_server('127.0.0.1', 3031, choose_ad, ThreadingWSGIServer)
     print 'Listening on port 3031....'
-    httpd.serve_forever()
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print('shutting down main server')
 
