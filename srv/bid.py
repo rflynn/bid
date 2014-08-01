@@ -107,23 +107,6 @@ def bidders_get():
         b.recv() # non-blocking read to throw away pending data
     return bidders
 
-def choose_ad(environ, start_response):
-    parameters = parse_qs(environ.get('QUERY_STRING', ''))
-    print 'parameters:', parameters
-    price = int(parameters.get('price','')[0])
-    start_response('200 OK',
-        [
-            ('Content-Type', 'application/json'),
-            ('Access-Control-Allow-Origin', '*')
-        ])
-    bidders = bidders_get()
-    winner_id, winner_price = auction(bidders, 0.1)
-    resp = {
-        'id': winner_id,
-        'price': price * (1+(random.random()/10))
-    }
-    return [json.dumps(resp)]
-
 vendors = [
     'brownsfashion.com'
     ,'lagarconne.com'
@@ -132,6 +115,37 @@ vendors = [
     ,'nordstrom.com'
     ,'barneys.com'
 ]
+
+bidders_init(vendors) # run init code!
+
+# choose a single ad
+def application(environ, start_response):
+
+    try:
+        parameters = parse_qs(environ.get('QUERY_STRING', ''))
+        print 'parameters:', parameters
+        price = int(parameters.get('price','')[0])
+    except:
+        start_response('400 Bad Request',
+            [
+                ('Content-Type', 'application/json'),
+                ('Access-Control-Allow-Origin', '*')
+            ])
+        return []
+
+    start_response('200 OK',
+        [
+            ('Content-Type', 'application/json'),
+            ('Access-Control-Allow-Origin', '*')
+        ])
+
+    bidders = bidders_get()
+    winner_id, winner_price = auction(bidders, 0.1)
+    resp = {
+        'id': winner_id,
+        'price': price * (1+(random.random()/10))
+    }
+    return [json.dumps(resp)]
 
 if __name__ == '__main__':
 
@@ -142,7 +156,7 @@ if __name__ == '__main__':
         pass
 
     bidders_init(vendors)
-    httpd = make_server('127.0.0.1', 3031, choose_ad, ThreadingWSGIServer)
+    httpd = make_server('127.0.0.1', 3031, application, ThreadingWSGIServer)
     print 'Listening on port 3031....'
     try:
         httpd.serve_forever()
