@@ -1,0 +1,43 @@
+digraph {
+  node [fontname=arial,fontsize=12,shape=oval,style=filled,color="#cccccc"]
+  edge [fontname=arial,fontsize=12,color="#666666"]
+  product_db [shape=box]
+  bid_db [shape=box]
+  stats_db [shape=box]
+  client_url
+  bid_req_api
+  bid_resp_api
+  stats_api
+
+  subgraph {
+    bidder_api
+    bidder_algorithm
+  }
+
+  vendor -> vendor_admin -> product_db -> vendor_admin
+  vendor_admin -> vendor
+
+  user -> client_url -> jslib -> bid_req_api -> jslib
+  jslib -> client_url [label="update link(s)"]
+  bid_req_api -> bid_process
+  bid_process -> bidder_api
+  bid_process -> product_db [label="calc bidders"]
+  product_db -> bid_process
+  bidder_api -> bidder_algorithm -> bid_resp_api -> bid_db
+  /*bidder_algorithm -> bidder_campaigns
+  bidder_algorithm -> bidder_limits
+  bidder_algorithm -> bidder_history*/
+  bid_process -> bid_db
+  bid_process -> bid_req_api
+  bid_db -> bid_process
+  bid_process -> stats_api [label="view results"]
+  stats_api -> stats_db [label="aggregate"]
+  stats_reporting -> stats_db -> stats_reporting
+  stats_reporting -> vendor
+
+  client_url -> link [label="click results"]
+  link -> redirect
+  redirect -> real_link [label="user"]
+  redirect -> stats_api [label=""]
+
+}
