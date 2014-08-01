@@ -53,37 +53,35 @@ var colors = [
     ,'violet'
 ];
 
+function bid_url(price)
+{
+    return 'http://localhost:3031/ad?price='+price+'&t='+Date.now();
+}
+
+function on_bid_response(span, msg)
+{
+    if (msg.hasOwnProperty('id')) {
+        var price = msg['price'];
+        var vendor = msg['id'];
+        var link = 'http://www.' + msg['id'] + '/';
+        console.log(span, price, msg, link);
+        $('span#'+span+' span.price').text('$'+Math.round(price));
+        $('span#'+span+' span.site a').attr('href', link);
+        $('span#'+span+' span.site a').text(vendor);
+    }
+}
+
 function bid(span)
 {
     var price = $('span#'+span+' span.price').text().substr(1);
     var jqxhr = $.ajax({
-        url: 'http://localhost:3031/ad?price='+price+'&t='+Date.now(),
+        url: bid_url(price),
         dataType: 'json',
         timeout: 3000
     })
-    .done(function(data) {
-        if (data['id']) {
-            var bgcolor = colors[data['id'] % colors.length];
-            var price = data['price'];
-            var vendor = data['id'];
-            var link = 'http://www.' + data['id'] + '/';
-            console.log(span, price, data, link);
-
-            $('span#'+span+' span.price').text('$'+Math.round(price));
-            $('span#'+span+' span.site a').attr('href', link);
-            $('span#'+span+' span.site a').text(vendor);
-            //$('span#'+span+' span.site').attr('background-color', bgcolor);
-        }
-    })
-    .fail(function() {
-        console.log("error");
-        bgcolor = 'red';
-    })
-    .always(function() {
-        //console.log("complete");
-        //$('body').attr('bgcolor', bgcolor);
-        $('span#'+span).show('slow');
-    });
+    .done(function(msg) { on_bid_response(span, msg); })
+    .fail(function() { console.log("error"); })
+    .always(function() { $('span#'+span).show('slow'); });
 }
 
 $(document).ready(function() {
