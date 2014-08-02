@@ -4,17 +4,17 @@ server {
     access_log  /var/log/nginx/bidx.co_access.log;
     error_log   /var/log/nginx/bidx.co_error.log;
 
-    location /bid/ { 
+    location / {
+        uwsgi_pass  unix:///tmp/bidx.co.www.sock;
+        include     uwsgi_params;
+    }
+
+    location /bid/ {
         uwsgi_pass  unix:///tmp/bidx.co.bid.sock;
         include     uwsgi_params;
     }
 
-    location / { 
-        uwsgi_pass  unix:///tmp/bidx.co.web.sock;
-        include     uwsgi_params;
-    }
-
     location /static/ {
-	alias /home/rf/src/bid/srv/www/static/;
+        alias /home/rf/src/bid/srv/www/static/;
     }
 }
