@@ -1,4 +1,32 @@
 # ex: set ts=4 et:
+
+"""
+bid_process via WSGI
+
+python -i
+import redis
+r = redis.Redis('localhost')
+>>> r.lrange('bidx', 0, -1)
+[]
+>>> r.lpush('bid-abc123', 'vendor1:bid1')
+1L
+>>> r.lpush('bid-abc123', 'vendor2:bid2')
+2L
+>>> r.lpush('bid-abc123', 'vendor3:bid3')
+3L
+>>> r.lrange('bid-abc123', 0, -1)
+['vendor3:bid3', 'vendor2:bid2', 'vendor1:bid1']
+>>> r.expire('bid-abc123', 0)
+True
+>>> r.lrange('bid-abc123', 0, -1)
+[]
+>>> r.lrange('bid-def456', 0, -1)
+[]
+>>> r.pexpire('bid-abc123', 0)
+0L
+
+"""
+
 import multiprocessing
 import time
 import random
