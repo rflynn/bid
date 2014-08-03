@@ -18,9 +18,10 @@
     </style>
 </head>
 <body style="background-color:#fff">
-<!--
-http://wpcontent.answcdn.com/wikipedia/commons/thumb/4/43/Standard_web_banner_ad_sizes.svg/580px-Standard_web_banner_ad_sizes.svg.png
--->
+
+<!-- begin bidx_export -->
+<div class="bidx_export">
+
 <div style="padding:0.5em; background-color:inherit; width:710px">
 <div>
     <img src="catalog.jpg">
@@ -28,37 +29,37 @@ http://wpcontent.answcdn.com/wikipedia/commons/thumb/4/43/Standard_web_banner_ad
 <div style="font-family:sans-serif; text-align:left">
 
 <span class="circle">1</span> Christopher Kane striped-detail cotton sweatshirt,
-<span id="a0" class="bamx">
+<span id="a0" class="bidx">
   <span class="price">$444</span>;
   <span class="site"><a href="http://www.brownsfashion.com/">brownsfashion.com</a></span>
 </span>
 
 <span class="circle">2</span> Rag &amp; Bone Boyfriend jean,
-<span id="a1" class="bamx">
+<span id="a1" class="bidx">
   <span class="price">$220</span>;
   <span class="site"><a href="http://www.lagarconne.com/">lagarconne.com</a></span>
 </span>
 
 <span class="circle">3</span> MAC Cosmetics Eye Kohl in Powersurgem
-<span id="a2" class="bamx">
+<span id="a2" class="bidx">
   <span class="price">$16</span>;
   <span class="site"><a href="http://www.maccosmetics.com/">maccosmetics.com</a></span>
 </span>
 
 <span class="circle">4</span> Clare Vivier Foldover clutch,
-<span id="a3" class="bamx">
+<span id="a3" class="bidx">
   <span class="price">$185</span>;
   <span class="site"><a href="http://www.stevenalan.com/">stevenalan.com</a></span>
 </span>
 
 <span class="circle">5</span> Vans Authentic Lo Pro Sneaker;
-<span id="a4" class="bamx">
+<span id="a4" class="bidx">
   <span class="price">$45</span>;
   <span class="site"><a href="http://www.nordstrom.com/">nordstrom.com</a></span>
 </span>
 
 <span class="circle">6</span> Balenciaga golden thick tube ring set,
-<span id="a5" class="bamx">
+<span id="a5" class="bidx">
   <span class="price">$765</span>;
   <span class="site"><a href="http://www.barneys.com/">barneys.com</a></span>
 </span>
@@ -66,51 +67,68 @@ http://wpcontent.answcdn.com/wikipedia/commons/thumb/4/43/Standard_web_banner_ad
 </div>
 </div>
 
+</div>
+<!-- end bidx_export -->
+
 <script>
 
-function bid_url(price)
-{
-    return 'http://bidx.co/bid/?price='+price+'&t='+Date.now();
-}
+var bidx = {
 
-function on_bid_response(span, msg)
-{
-    if (msg.hasOwnProperty('id')) {
-        var price = msg['price'];
-        var vendor = msg['id'];
-        var link = 'http://www.' + msg['id'] + '/';
-        console.log(span, price, msg, link);
-        $('span#'+span+' span.price').text('$'+Math.round(price));
-        $('span#'+span+' span.site a').attr('href', link);
-        $('span#'+span+' span.site a').text(vendor);
+    init: function()
+    {
+        return true;
+    },
+
+    bid_url: function(price)
+    {
+        return 'http://bidx.co/bid/?price='+price+'&t='+Date.now();
+    },
+
+    on_bid_response: function(span, msg)
+    {
+        if (msg.hasOwnProperty('id')) {
+            var price = msg['price'];
+            var vendor = msg['id'];
+            var link = 'http://www.' + msg['id'] + '/';
+            console.log(span, price, msg, link);
+            $('span#'+span+' span.price').text('$'+Math.round(price));
+            $('span#'+span+' span.site a').attr('href', link);
+            $('span#'+span+' span.site a').text(vendor);
+        }
+    },
+
+    bid: function(span)
+    {
+        var price = $('span#'+span+' span.price').text().substr(1);
+        var jqxhr = $.ajax({
+            url: bidx.bid_url(price),
+            dataType: 'json',
+            timeout: 3000
+        })
+        .done(function(msg) { on_bid_response(span, msg); })
+        .fail(function() { console.log("error"); })
+        .always(function() { $('span#'+span).show('slow'); });
+    },
+
+    run: function()
+    {
+        var biddable = document.getElementsByClassName('bidx');
+        for (var i = 0; i < biddable.length; i++) {
+            var span = biddable[i].attributes["id"].value;
+            console.log(span);
+            $('span#'+span).hide() // TODO: remove dependence on jQuery
+            setTimeout(function(span) {
+                return function() {
+                    bidx.bid(span)
+                }
+            }(span), 500*i);
+        }
     }
-}
-
-function bid(span)
-{
-    var price = $('span#'+span+' span.price').text().substr(1);
-    var jqxhr = $.ajax({
-        url: bid_url(price),
-        dataType: 'json',
-        timeout: 3000
-    })
-    .done(function(msg) { on_bid_response(span, msg); })
-    .fail(function() { console.log("error"); })
-    .always(function() { $('span#'+span).show('slow'); });
-}
+};
 
 $(document).ready(function() {
-    var bamx = document.getElementsByClassName('bamx');
-    for (var i = 0; i < bamx.length; i++) {
-        var span = bamx[i].attributes["id"].value;
-        console.log(span);
-        $('span#'+span).hide() // TODO: remove dependence on jQuery
-        setTimeout(function(span) {
-            return function() {
-                bid(span)
-            }
-        }(span), 500*i);
-    }
+    bidx.init();
+    bidx.run();
 });
 </script>
 
