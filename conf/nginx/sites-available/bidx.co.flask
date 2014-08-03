@@ -1,0 +1,39 @@
+# vim: set ts=8 noet:
+
+server {
+
+	listen 80;
+
+	server_name	bidx.co www.bidx.co;
+	access_log	/var/log/nginx/bidx.co_access.log;
+	error_log	/var/log/nginx/bidx.co_error.log;
+
+	location /static/  {
+		alias /home/rf/src/bid/srv/www/static/;
+	}
+
+	# Serve a static file (ex. favico) outside static dir.
+	location = /favico.ico  {
+		root /app/favico.ico;
+	}
+
+	# Proxying connections to application servers
+	location / {
+
+		include			uwsgi_params;
+		uwsgi_pass		uwsgicluster;
+
+		proxy_redirect		off;
+		proxy_set_header	Host $host;
+		proxy_set_header	X-Real-IP $remote_addr;
+		proxy_set_header	X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header	X-Forwarded-Host $server_name;
+
+	}
+
+	location /bid/ {
+		uwsgi_pass	unix:///tmp/bidx.co.bid.sock;
+		include		uwsgi_params;
+	}
+
+}
