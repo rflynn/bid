@@ -1,26 +1,29 @@
 <!doctype html>
 <html>
 <head>
-    <script src="jquery.min.js"></script>
     <title>Ads</title>
     <style>
     body, div, span, a {
         font-family: Arial, Helvetica, sans-serif;
-    }
-    .circle {
-        border-radius: 50%;
-        background-color: black;
-        color: white;
-        padding-left:4px;
-        padding-right:4px;
-        font-weight: 100;
     }
     </style>
 </head>
 <body style="background-color:#fff">
 
 <!-- begin bidx_export -->
-<div class="bidx_export">
+
+<style>
+div.bidx span.circle {
+    border-radius:    50%;
+    background-color: black;
+    color:            white;
+    padding-left:     4px;
+    padding-right:    4px;
+    font-weight:      100;
+}
+</style>
+
+<div class="bidx_export" id="bidx_22086922-ef65-46e6-83a4-c427676814f8">
 
 <div style="padding:0.5em; background-color:inherit; width:710px">
 <div>
@@ -68,69 +71,17 @@
 </div>
 
 </div>
-<!-- end bidx_export -->
 
+<script src="jquery.min.js"></script>
+<script src="//bidx.co/static/demo/bidx.js"></script>
 <script>
-
-var bidx = {
-
-    init: function()
-    {
-        return true;
-    },
-
-    bid_url: function(price)
-    {
-        return 'http://bidx.co/bid/?price='+price+'&t='+Date.now();
-    },
-
-    on_bid_response: function(span, msg)
-    {
-        if (msg.hasOwnProperty('id')) {
-            var price = msg['price'];
-            var vendor = msg['id'];
-            var link = 'http://www.' + msg['id'] + '/';
-            console.log(span, price, msg, link);
-            $('span#'+span+' span.price').text('$'+Math.round(price));
-            $('span#'+span+' span.site a').attr('href', link);
-            $('span#'+span+' span.site a').text(vendor);
-        }
-    },
-
-    bid: function(span)
-    {
-        var price = $('span#'+span+' span.price').text().substr(1);
-        var jqxhr = $.ajax({
-            url: bidx.bid_url(price),
-            dataType: 'json',
-            timeout: 3000
-        })
-        .done(function(msg) { on_bid_response(span, msg); })
-        .fail(function() { console.log("error"); })
-        .always(function() { $('span#'+span).show('slow'); });
-    },
-
-    run: function()
-    {
-        var biddable = document.getElementsByClassName('bidx');
-        for (var i = 0; i < biddable.length; i++) {
-            var span = biddable[i].attributes["id"].value;
-            console.log(span);
-            $('span#'+span).hide() // TODO: remove dependence on jQuery
-            setTimeout(function(span) {
-                return function() {
-                    bidx.bid(span)
-                }
-            }(span), 500*i);
-        }
-    }
-};
-
 $(document).ready(function() {
     bidx.init();
     bidx.run();
 });
 </script>
+
+<!-- end bidx_export -->
 
 </body>
 </html>
