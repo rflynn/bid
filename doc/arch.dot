@@ -1,43 +1,99 @@
 digraph {
-  node [fontname=arial,fontsize=12,shape=oval,style=filled,color="#cccccc"]
-  edge [fontname=arial,fontsize=12,color="#666666"]
-  product_db [shape=box]
-  bid_db [shape=box]
-  stats_db [shape=box]
-  client_url
-  bid_req_api
-  bid_resp_api
-  stats_api
 
-  subgraph {
-    bidder_api
-    bidder_algorithm
+  title="BAM-X Data Flow"
+
+  //overlap=false;
+  overlap=vpsc;
+
+  node [fontname=Courier,fontsize=9,shape=oval,style=filled,color="cadetblue3"]
+  edge [len=1.5,fontname=Courier,fontsize=11,color="#666666"]
+
+  //rankdir=LR;
+
+  //publisher
+
+  subgraph cluster_bidder {
+    label="bidder";
+    style=filled
+    bgcolor="honeydew"
+    penwidth=0.1
   }
 
-  vendor -> vendor_admin -> product_db -> vendor_admin
-  vendor_admin -> vendor
+  subgraph _stats {
+    label="stats"
+    style=filled
+    bgcolor="honeydew"
+    penwidth=0.1
+    stats_db [shape=DatabaseShape,peripheries=0,color="khaki2"];
+    stats_api
+  }
 
-  user -> client_url -> jslib -> bid_req_api -> jslib
-  jslib -> client_url [label="update link(s)"]
-  bid_req_api -> bid_process
-  bid_process -> bidder_api
-  bid_process -> product_db [label="calc bidders"]
-  product_db -> bid_process
+  subgraph cluster_network {
+    label="network"
+    style=filled
+    bgcolor="honeydew"
+    penwidth=0.1
+    bid_req_api [shape=parallelogram]
+    bid_process
+    bid_db [shape=DatabaseShape,peripheries=0,color="khaki2"];
+    bid_resp_api
+    redirect
+    product_api
+    product_db [shape=DatabaseShape,peripheries=0,color="khaki2"];
+  }
+
+  subgraph cluster_customer {
+    label="customer/publisher"
+    style=filled
+    bgcolor="honeydew"
+    penwidth=0.1
+    customer [shape=hexagon]
+    publisher_url
+    jslib
+    real_link
+  }
+
+  subgraph cluster_merchant {
+    label="merchant"
+    style=filled
+    bgcolor="honeydew"
+    penwidth=0.1
+    merchant [shape=hexagon]
+    merchant_admin
+    merchant_stats_reports
+  }
+
+  subgraph cluster_merchant_campaign {
+    label="merchant campaign"
+    style=filled
+    bgcolor="honeydew"
+    penwidth=0.1
+
+    campaign_api
+    bidder_api
+    bidder_algorithm [shape=egg]
+    campaign_db [shape=DatabaseShape,peripheries=0,color="khaki2",label="campaign_db\ncampaigns\nlimits\nstats\nhistory"];
+  }
+
+  merchant -> merchant_admin [dir=both]
+  merchant_admin -> product_api [dir=both]
+
+  customer -> publisher_url [dir=both]
+  publisher_url -> jslib [dir=both]
+  bid_req_api -> jslib [dir=both]
+  bid_process -> { bidder_api product_api }
+  product_api -> product_db [dir=both]
   bidder_api -> bidder_algorithm -> bid_resp_api -> bid_db
-  /*bidder_algorithm -> bidder_campaigns
-  bidder_algorithm -> bidder_limits
-  bidder_algorithm -> bidder_history*/
-  bid_process -> bid_db
-  bid_process -> bid_req_api
-  bid_db -> bid_process
-  bid_process -> stats_api [label="view results"]
-  stats_api -> stats_db [label="aggregate"]
-  stats_reporting -> stats_db -> stats_reporting
-  stats_reporting -> vendor
+  bidder_algorithm -> campaign_api
+  campaign_api -> campaign_db [dir=both]
+  bid_process -> bid_db [dir=both]
+  bid_process -> bid_req_api [dir=both]
+  bid_process -> stats_api [label=""]
+  stats_api -> stats_db [dir=both]
 
-  client_url -> link [label="click results"]
-  link -> redirect
-  redirect -> real_link [label="user"]
-  redirect -> stats_api [label=""]
+  publisher_url -> redirect [label="click"]
+  redirect -> { stats_api real_link }
+
+  merchant_stats_reports -> stats_api
 
 }
