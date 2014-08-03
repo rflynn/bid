@@ -6,9 +6,9 @@ var bidx = {
         return true;
     },
 
-    bid_url: function(price)
+    bid_url: function(price, gtin)
     {
-        return 'http://bidx.co/bid/?price='+price+'&t='+Date.now();
+        return 'http://bidx.co/bid/?gtin='+gtin+'&price='+price+'&t='+Date.now();
     },
 
     on_bid_response: function(span, msg)
@@ -27,8 +27,9 @@ var bidx = {
     bid: function(span)
     {
         var price = $('span#'+span+' span.price').text().substr(1);
+        var gtin  = $('span#'+span+'').attr('gtin') || 'unknown'
         var jqxhr = $.ajax({
-            url: bidx.bid_url(price),
+            url: bidx.bid_url(price, gtin),
             dataType: 'json',
             timeout: 3000
         })
