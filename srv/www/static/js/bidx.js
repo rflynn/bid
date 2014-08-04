@@ -1,7 +1,7 @@
 
 var bidx = {
 
-    init: function()
+    init: function(opts)
     {
         return true;
     },
