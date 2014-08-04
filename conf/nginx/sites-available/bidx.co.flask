@@ -37,3 +37,42 @@ server {
 	}
 
 }
+
+
+# HTTPS server
+#
+server {
+	listen 443 ssl;
+	server_name bidx.co www.bidx.co;
+
+	keepalive_timeout 70;
+
+	# ref: https://www.digitalocean.com/community/tutorials/how-to-create-a-ssl-certificate-on-nginx-for-ubuntu-12-04
+	ssl on;
+	ssl_certificate		/etc/nginx/ssl/bidx.co.crt;
+	ssl_certificate_key	/etc/nginx/ssl/bidx.co.key;
+
+	# ref: https://bjornjohansen.no/optimizing-https-nginx
+	ssl_session_cache	shared:SSL:20m;
+	ssl_session_timeout	10m;
+
+	# need SSLv3 for ie6?
+	ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+	ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
+	ssl_prefer_server_ciphers on;
+
+	location / {
+		uwsgi_pass  unix:///tmp/bidx.co.www.sock;
+		include     uwsgi_params;
+	}
+
+	location /bid/ {
+		uwsgi_pass  unix:///tmp/bidx.co.bid.sock;
+		include     uwsgi_params;
+	}
+
+	location /static/ {
+		alias /home/rf/src/bid/srv/www/static/;
+	}
+
+}

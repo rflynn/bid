@@ -1,0 +1,11 @@
+
+# install nginx ssl
+su -
+mkdir /etc/nginx/ssl
+cd /etc/nginx/ssl
+openssl genrsa -des3 -out bidx.co.key 1024
+openssl req -new -key bidx.co.key -out bidx.co.csr
+cp bidx.co.key bidx.co.key.org
+openssl rsa -in bidx.co.key.org -out bidx.co.key
+openssl x509 -req -days 365 -in bidx.co.csr -signkey bidx.co.key -out bidx.co.crt
+
