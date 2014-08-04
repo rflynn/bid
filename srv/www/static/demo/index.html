@@ -26,54 +26,68 @@ div.bidx_export span.circle {
 
 <div style="padding:0.5em; background-color:inherit; width:710px">
 <div>
-    <img src="catalog.jpg">
+    <img src="//www.bidx.co/static/demo/catalog.jpg">
 </div>
 <div style="font-family:sans-serif; text-align:left">
 
 <span id="a0" class="bidx" gtin="00012345678905">
   <span class="circle">1</span> Christopher Kane striped-detail cotton sweatshirt,
-  <span class="price">$444</span>;
-  <span class="site"><a href="http://www.brownsfashion.com/">brownsfashion.com</a></span>
+  <span class="biddable">
+    <span class="price">$444</span>;
+    <span class="site"><a href="http://www.brownsfashion.com/">brownsfashion.com</a></span>
+  </span>
 </span>
 
 <span id="a1" class="bidx" gtin="00012345678906">
   <span class="circle">2</span> Rag &amp; Bone Boyfriend jean,
-  <span class="price">$220</span>;
-  <span class="site"><a href="http://www.lagarconne.com/">lagarconne.com</a></span>
+  <span class="biddable">
+    <span class="price">$220</span>;
+    <span class="site"><a href="http://www.lagarconne.com/">lagarconne.com</a></span>
+  </span>
 </span>
 
 <span id="a2" class="bidx" gtin="00012345678907">
   <span class="circle">3</span> MAC Cosmetics Eye Kohl in Powersurgem
-  <span class="price">$16</span>;
-  <span class="site"><a href="http://www.maccosmetics.com/">maccosmetics.com</a></span>
+  <span class="biddable">
+    <span class="price">$16</span>;
+    <span class="site"><a href="http://www.maccosmetics.com/">maccosmetics.com</a></span>
+  </span>
 </span>
 
 <span id="a3" class="bidx" gtin="00012345678908">
   <span class="circle">4</span> Clare Vivier Foldover clutch,
-  <span class="price">$185</span>;
-  <span class="site"><a href="http://www.stevenalan.com/">stevenalan.com</a></span>
+  <span class="biddable">
+    <span class="price">$185</span>;
+    <span class="site"><a href="http://www.stevenalan.com/">stevenalan.com</a></span>
+  </span>
 </span>
 
 <span id="a4" class="bidx" gtin="00012345678909">
   <span class="circle">5</span> Vans Authentic Lo Pro Sneaker;
-  <span class="price">$45</span>;
-  <span class="site"><a href="http://www.nordstrom.com/">nordstrom.com</a></span>
+  <span class="biddable">
+    <span class="price">$45</span>;
+    <span class="site"><a href="http://www.nordstrom.com/">nordstrom.com</a></span>
+  </span>
 </span>
 
 <span id="a5" class="bidx" gtin="00012345678910">
   <span class="circle">6</span> Balenciaga golden thick tube ring set,
-  <span class="price">$765</span>;
-  <span class="site"><a href="http://www.barneys.com/">barneys.com</a></span>
+  <span class="biddable">
+    <span class="price">$765</span>;
+    <span class="site"><a href="http://www.barneys.com/">barneys.com</a></span>
+  </span>
 </span>
 
 </div>
 </div>
 
-<script src="//bidx.co/static/js/jquery.min.js"></script>
-<script src="//bidx.co/static/js/bidx.js"></script>
+<script src="//www.bidx.co/static/js/jquery.min.js"></script>
+<script src="//www.bidx.co/static/js/bidx.js"></script>
 <script>
 $(document).ready(function() {
-    bidx.init();
+    bidx.init({
+	'appid':'1b648829-3d56-4bf1-9f9c-123413f26304'
+    });
     bidx.run();
 });
 </script>

@@ -32,9 +32,9 @@ var bidx = {
 
     bid: function(span)
     {
-        var price = $('span#'+span+' > span.price').text().substr(1);
+        var price = $('span#'+span+' span.price').text().substr(1);
         var gtin  = $('span#'+span+'').attr('gtin') || 'unknown';
-        var site  = $('span#'+span+' > span.site > a').attr('href') || 'unknown';
+        var site  = $('span#'+span+' span.site > a').attr('href') || 'unknown';
         var jqxhr = $.ajax({
             url: bidx.bid_url(price, gtin, site),
             dataType: 'json',
@@ -42,7 +42,7 @@ var bidx = {
         })
         .done(function(msg) { bidx.on_bid_response(span, msg); })
         .fail(function() { console.log("error"); })
-        .always(function() { $('span#'+span).show('slow'); });
+        .always(function() { $('span#'+span+' > .biddable').show('slow'); });
     },
 
     run: function()
@@ -51,7 +51,7 @@ var bidx = {
         for (var i = 0; i < biddable.length; i++) {
             var span = biddable[i].attributes["id"].value;
             console.log(span);
-            $('span#'+span).hide() // TODO: remove dependence on jQuery
+            $('span#'+span+' > .biddable').hide() // TODO: remove dependence on jQuery
             setTimeout(function(span) {
                 return function() {
                     bidx.bid(span)
