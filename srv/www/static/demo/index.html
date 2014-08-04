@@ -12,6 +12,7 @@
 
 <!-- begin bidx_export -->
 
+<div class="bidx_export" id="bidx_22086922-ef65-46e6-83a4-c427676814f8">
 <style>
 div.bidx_export span.circle {
     border-radius:    50%;
@@ -22,8 +23,6 @@ div.bidx_export span.circle {
     font-weight:      100;
 }
 </style>
-
-<div class="bidx_export" id="bidx_22086922-ef65-46e6-83a4-c427676814f8">
 
 <div style="padding:0.5em; background-color:inherit; width:710px">
 <div>
@@ -70,8 +69,6 @@ div.bidx_export span.circle {
 </div>
 </div>
 
-</div>
-
 <script src="//bidx.co/static/js/jquery.min.js"></script>
 <script src="//bidx.co/static/js/bidx.js"></script>
 <script>
@@ -80,8 +77,22 @@ $(document).ready(function() {
     bidx.run();
 });
 </script>
+</div>
 
 <!-- end bidx_export -->
+
+<div>
+    <form>
+	<textarea id="foo" name="foo" cols="80" rows="20" style="font-family:courier; overflow-y:scroll">
+	</textarea>
+    </form>
+</div>
+
+<script>
+$(document).ready(function () {
+    $('#foo')[0].innerText = $('.bidx_export')[0].innerHTML.trim();
+});
+</script>
 
 </body>
 </html>
