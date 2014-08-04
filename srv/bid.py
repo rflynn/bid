@@ -33,6 +33,7 @@ import random
 import socket
 import copy
 import json
+import urllib2
 import errno
 import struct
 from cgi import parse_qs, escape
@@ -129,11 +130,14 @@ def bidders_init(vendors):
     time.sleep(0.2) # wait for init
     return pool, bidders
 
-def bidders_get():
+def bidders_get(merchant_ids):
     global bidders
+    merchants = {}
     for i,b in bidders.items():
-        b.recv() # non-blocking read to throw away pending data
-    return bidders
+        if i in merchant_ids:
+            b.recv() # non-blocking read to throw away pending data
+            merchants[i] = b
+    return merchants
 
 vendors = [
     'brownsfashion.com'
@@ -150,9 +154,10 @@ bidders_init(vendors) # run init code!
 def application(environ, start_response):
 
     try:
-        parameters = parse_qs(environ.get('QUERY_STRING', ''))
-        print 'parameters:', parameters
-        price = int(parameters.get('price','')[0])
+        params = parse_qs(environ.get('QUERY_STRING', ''))
+        print 'params:', params
+        price = int(params.get('price',[None])[0])
+        gtin = int(params.get('gtin',[None])[0])
     except:
         start_response('400 Bad Request',
             [
@@ -167,10 +172,14 @@ def application(environ, start_response):
             ('Access-Control-Allow-Origin', '*')
         ])
 
-    bidders = bidders_get()
+    merchant_ids = [mp['merchant_id']
+        for mp in json.loads(urllib2.urlopen('http://bidx.co/api/v0/merchant-product/gtin/' + str(gtin)).read())['merchant_product']]
+    bidders = bidders_get(merchant_ids)
     winner_id, winner_price = auction(bidders, 0.1)
+
     resp = {
         'id': winner_id,
+        # FIXME: price json encoding should be rounded to 2 decimal places... json module is stupid...
         'price': price * (1+(random.random()/10))
     }
     return [json.dumps(resp)]
