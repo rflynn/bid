@@ -20,9 +20,9 @@ var bidx = {
     on_bid_response: function(span, msg)
     {
         if (msg.hasOwnProperty('id')) {
-            var price = msg['price'];
-            var vendor = msg['id'];
-            var link = 'http://www.' + msg['id'] + '/';
+            var price = msg.price;
+            var vendor = msg.id;
+            var link = 'http://www.' + vendor + '/';
             console.log(span, price, msg, link);
             $('span#'+span+' span.price').text('$'+Math.round(price));
             $('span#'+span+' span.site a').attr('href', link);
