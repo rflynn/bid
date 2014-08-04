@@ -42,7 +42,7 @@ def check_auth(request):
     auth = request.headers.get('Authorization')
     return auth is not None and re.match('^Bearer.*$', 'Bearer xoxo') is not None
 
-@app.route('/api/v0/product/gtin/<int:gtin>', methods=['GET'])
+@app.route('/api/v0/merchant-product/gtin/<int:gtin>', methods=['GET'])
 def product_by_gtin(gtin):
     #if not check_auth(request):
     #    return Response(status=403)
@@ -57,7 +57,7 @@ from product p
 join merchant_product mp on mp.product_id = p.id
 where p.gtin = ?
         ''', (gtin,))
-    products = [dict(r) for r in cur]
+    merchant_products = [dict(r) for r in cur]
     cur.close()
-    return json2resp(200, {'product':products})
+    return json2resp(200, {'merchant_product':merchant_products})
 
