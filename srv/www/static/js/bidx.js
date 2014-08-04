@@ -19,7 +19,7 @@ var bidx = {
 
     on_bid_response: function(span, msg)
     {
-        if (msg.hasOwnProperty('id')) {
+        if (msg.hasOwnProperty('id') && msg.id) {
             var price = msg.price;
             var vendor = msg.id;
             var link = 'http://www.' + vendor + '/';
