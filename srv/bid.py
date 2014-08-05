@@ -76,7 +76,7 @@ def bidder_server(args):
             time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
             bid_price = round(random.random() / 10, 3)
             print (data, id, bid_price)
-            r.zadd(data, id, bid_price)
+            r.zadd(data, vendor, bid_price)
     except KeyboardInterrupt:
         print('shutting down bidder %s' % vendor)
 
