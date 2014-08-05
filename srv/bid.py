@@ -65,15 +65,19 @@ class BidderClient:
 
 def bidder_server(args):
     id, port, vendor = args
+    print args
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('0.0.0.0', port))
     print 'port %s bidder %s' % (port, vendor)
     r = redis.Redis('localhost')
     try:
+        # NOTE: XXX: this loop is single threaded -- each bid blocks the next
+        # a real bid server should use a threadpool
         while True:
+            # "data" is the auction id
             data, addr = s.recvfrom(1024)
             print 'bidder %s received: %s' % (vendor, data)
-            time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
+            #time.sleep(0.01 * random.randint(1,5)) # simulate delay, may exceed deadline
             bid_price = round(random.random() / 10, 3)
             print (data, id, bid_price)
             r.zadd(data, vendor, bid_price)
@@ -91,9 +95,9 @@ def auction(bidders, max_sec):
     for i,b in bidders.items():
         print 'engine bid request to %s' % b.port
         b.send(auction_id)
-
-    # gather bids up to deadline
+    # wait until deadline
     time.sleep(end - time.time() - 0.04)
+    # collect sorted bids at deadline
     bids = r.zrange(auction_id, 0, -1, withscores=True)
     print 'bids:', bids
     r.expire(auction_id, 3) # expire in a few seconds to catch old bids
@@ -163,8 +167,6 @@ def application(environ, start_response):
         for mp in json.loads(urllib2.urlopen('http://bidx.co/api/v0/merchant-product/gtin/' + str(gtin)).read())['merchant_product']]
     bidders = bidders_get(merchant_ids)
     winner_id, winner_price = auction(bidders, 0.1)
-    if winner_id:
-        winner_id = int(winner_id)
 
     resp = {
         'id': winner_id,
