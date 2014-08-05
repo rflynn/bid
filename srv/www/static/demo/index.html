@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Ads</title>
+    <meta charset="utf8">
     <style>
     body, div, span, a {
         font-family: Arial, Helvetica, sans-serif;
@@ -104,7 +105,7 @@ $(document).ready(function() {
 
 <script>
 $(document).ready(function () {
-    $('#foo')[0].innerText = $('.bidx_export')[0].innerHTML.trim();
+    $('#foo').text($('.bidx_export').html().trim());
 });
 </script>
 

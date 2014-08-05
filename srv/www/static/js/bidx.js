@@ -8,12 +8,15 @@ var bidx = {
 
     bid_url: function(price, gtin, site)
     {
+        // NOTE: browsers limit concurrent connections by domain, so consider implementing subdomains
+        // a better alternative is to batch all bids into a single request!
+        var ts = +Date.now();
         return (
             'http://bidx.co/bid/'
-            + '?gtin='  + encodeURIComponent(gtin)
-            + '&price=' + encodeURIComponent(price)
-            + '&site='  + encodeURIComponent(site)
-            + '&t='     + encodeURIComponent(+Date.now())
+                + '?gtin='  + encodeURIComponent(gtin)
+                + '&price=' + encodeURIComponent(price)
+                + '&site='  + encodeURIComponent(site)
+                + '&t='     + encodeURIComponent(ts)
         );
     },
 
@@ -51,12 +54,15 @@ var bidx = {
         for (var i = 0; i < biddable.length; i++) {
             var span = biddable[i].attributes["id"].value;
             console.log(span);
-            $('span#'+span+' > .biddable').hide() // TODO: remove dependence on jQuery
+            //$('span#'+span+' > .biddable').hide() // TODO: remove dependence on jQuery
+            bidx.bid(span)
+            /*
             setTimeout(function(span) {
                 return function() {
                     bidx.bid(span)
                 }
-            }(span), 500*i);
+            }(span), 0*i);
+            */
         }
     }
 };

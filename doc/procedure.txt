@@ -20,6 +20,6 @@ ufw logging on
 ufw allow ssh/tcp
 ufw allow http/tcp
 ufw allow https/tcp
-ufw allow 6379/tcp # redis
+#ufw allow 6379/tcp # redis
 ufw enable
 
