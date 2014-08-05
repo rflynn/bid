@@ -6,25 +6,18 @@ bid_process via WSGI
 python -i
 import redis
 r = redis.Redis('localhost')
->>> r.lrange('bidx', 0, -1)
-[]
->>> r.lpush('bid-abc123', 'vendor1:bid1')
-1L
->>> r.lpush('bid-abc123', 'vendor2:bid2')
-2L
->>> r.lpush('bid-abc123', 'vendor3:bid3')
-3L
->>> r.lrange('bid-abc123', 0, -1)
-['vendor3:bid3', 'vendor2:bid2', 'vendor1:bid1']
->>> r.expire('bid-abc123', 0)
+>>> r.zadd('bid.abc123', 'vendor.1', 34)
+1
+>>> r.zadd('bid.abc123', 'vendor.2', 15)
+1
+>>> r.zadd('bid.abc123', 'vendor.3', 3)
+1
+>>> r.zrange('bid.abc123', 0, -1, withscores=True)
+[('vendor.3', 3.0), ('vendor.2', 15.0), ('vendor.1', 34.0)]
+>>> r.expire('bid.abc123', 0)
 True
->>> r.lrange('bid-abc123', 0, -1)
+>>> r.zrange('bid.abc123', 0, -1, withscores=True)
 []
->>> r.lrange('bid-def456', 0, -1)
-[]
->>> r.pexpire('bid-abc123', 0)
-0L
-
 """
 
 import multiprocessing
@@ -37,6 +30,8 @@ import urllib2
 import errno
 import struct
 from cgi import parse_qs, escape
+import uuid
+import redis
 
 def pack(bid_id, bidder_id, bid):
     # struct.unpack('<QQL', struct.pack('<QQL', 0, random.randint(0,0xffffffffL), 5))
@@ -73,55 +68,47 @@ def bidder_server(args):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('0.0.0.0', port))
     print 'port %s bidder %s' % (port, vendor)
+    r = redis.Redis('localhost')
     try:
         while True:
             data, addr = s.recvfrom(1024)
             print 'bidder %s received: %s' % (vendor, data)
             time.sleep(0.01 * random.randint(1,10)) # simulate delay, may exceed deadline
-            # TODO: use binary format via struct.pack
-            msg = 'bidder %s bids %.3f' % (vendor, round(random.random() / 10, 3))
-            s.sendto(msg, addr)
+            bid_price = round(random.random() / 10, 3)
+            print (data, id, bid_price)
+            r.zadd(data, id, bid_price)
     except KeyboardInterrupt:
         print('shutting down bidder %s' % vendor)
 
 def auction(bidders, max_sec):
     # launch bidding
+    start = time.time()
     print 'auction start'
-    end = time.time() + max_sec
+    end = start + max_sec
+    auction_id = str(uuid.uuid1())
+    r = redis.Redis('localhost')
     print 'deadline', end
     for i,b in bidders.items():
         print 'engine bid request to %s' % b.port
-        b.send('bid!')
+        b.send(auction_id)
+
     # gather bids up to deadline
-    notseen = copy.copy(bidders)
-    bids = dict()
-    while notseen and time.time() < end:
-        # try non-blocking read from any bidders we haven't heard from...
-        for i,b in notseen.items():
-            bid = b.recv()
-            if bid:
-                print bid
-                bids[i] = bid
-                del notseen[i]
-        time.sleep(0.02) # tick
-    print 'bid finished', time.time()
-    print len(bids), 'bids received', bids
-    # NOTE: doesn't handle ties
-    winner = sorted(bids.values(),
-                    key=lambda s:float(s.split(' ')[-1]),
-                    reverse=True)[0] if bids else None
+    time.sleep(end - time.time() - 0.04)
+    bids = r.zrange(auction_id, 0, -1, withscores=True)
+    print 'bids:', bids
+    r.expire(auction_id, 3) # expire in a few seconds to catch old bids
+    winner = bids[-1] if bids else (None, None)
     print 'the winner is', winner
-    winner_id = winner.split(' ')[1] if winner else None
-    winner_price = float(winner.split(' ')[-1]) if winner else None
-    return winner_id, winner_price
+    return winner
 
 pool = None
 bidders = None
 
 def bidders_init(vendors):
     global pool, bidders
+    print 'len(vendors)', len(vendors)
     pool = multiprocessing.Pool(len(vendors))
-    bidders = {i: BidderClient(i, v, '127.0.0.1', 5000+i)
+    bidders = {i: BidderClient(i, v, '127.0.0.1', 9000+i)
                 for i,v in enumerate(vendors)}
     # launch bidders
     pool.map_async(bidder_server,
@@ -176,6 +163,8 @@ def application(environ, start_response):
         for mp in json.loads(urllib2.urlopen('http://bidx.co/api/v0/merchant-product/gtin/' + str(gtin)).read())['merchant_product']]
     bidders = bidders_get(merchant_ids)
     winner_id, winner_price = auction(bidders, 0.1)
+    if winner_id:
+        winner_id = int(winner_id)
 
     resp = {
         'id': winner_id,
@@ -192,7 +181,6 @@ if __name__ == '__main__':
     class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
         pass
 
-    bidders_init(vendors)
     httpd = make_server('127.0.0.1', 3031, application, ThreadingWSGIServer)
     print 'Listening on port 3031....'
     try:
