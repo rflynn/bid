@@ -1,4 +1,10 @@
 
+# lsb_release -a
+Distributor ID:	Ubuntu
+Description:	Ubuntu 14.04.1 LTS
+Release:	14.04
+Codename:	trusty
+
 # install nginx ssl
 su -
 mkdir /etc/nginx/ssl
@@ -8,4 +14,12 @@ openssl req -new -key bidx.co.key -out bidx.co.csr
 cp bidx.co.key bidx.co.key.org
 openssl rsa -in bidx.co.key.org -out bidx.co.key
 openssl x509 -req -days 365 -in bidx.co.csr -signkey bidx.co.key -out bidx.co.crt
+
+# set up firewall
+ufw logging on
+ufw allow ssh/tcp
+ufw allow http/tcp
+ufw allow https/tcp
+ufw allow 6379/tcp # redis
+ufw enable
 
